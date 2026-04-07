@@ -1,17 +1,18 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { Toaster } from './components/ui/toaster';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Groups from './pages/Groups';
-import GroupDetail from './pages/GroupDetail';
-import AddExpense from './pages/AddExpense';
-import Balances from './pages/Balances';
-import Activity from './pages/Activity';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Toaster } from "./components/ui/toaster";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import Groups from "./pages/Groups";
+import GroupDetail from "./pages/GroupDetail";
+import CreateGroup from "./pages/CreateGroup";
+import AddExpense from "./pages/AddExpense";
+import Balances from "./pages/Balances";
+import Activity from "./pages/Activity";
+import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -79,6 +80,7 @@ function App() {
           >
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="groups" element={<Groups />} />
+            <Route path="groups/create" element={<CreateGroup />} />
             <Route path="groups/:id" element={<GroupDetail />} />
             <Route path="expenses/add" element={<AddExpense />} />
             <Route path="balances" element={<Balances />} />
