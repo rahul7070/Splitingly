@@ -47,67 +47,68 @@ const GroupDetail = () => {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    fetchGroupData();
-  }, [id]);
+    const loadGroupData = async () => {
+      try {
+        setLoading(true);
+        const [groupRes, expensesRes, settlementsRes] = await Promise.all([
+          groupAPI.getGroup(id),
+          expenseAPI.getExpenses(id),
+          settlementAPI.getSettlements(id),
+        ]);
+
+        setGroup(groupRes.data);
+        setGroupExpenses(expensesRes.data);
+        setGroupSettlements(settlementsRes.data);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load group details",
+          variant: "destructive",
+        });
+        navigate("/groups");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGroupData();
+  }, [id, navigate]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
+      const runUserSearch = async () => {
+        if (!searchQuery.trim()) {
+          setSearchResults([]);
+          return;
+        }
+
+        setSearching(true);
+        try {
+          const response = await userAPI.searchUsers(searchQuery);
+          const filtered = response.data.filter(
+            (user) => !group?.members?.some((member) => member.id === user.id),
+          );
+          setSearchResults(filtered);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to search users",
+            variant: "destructive",
+          });
+        } finally {
+          setSearching(false);
+        }
+      };
+
       if (searchQuery && addMemberOpen) {
-        handleSearchUsers();
+        runUserSearch();
+      } else if (!searchQuery.trim()) {
+        setSearchResults([]);
       }
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
-
-  const fetchGroupData = async () => {
-    try {
-      setLoading(true);
-      const [groupRes, expensesRes, settlementsRes] = await Promise.all([
-        groupAPI.getGroup(id),
-        expenseAPI.getExpenses(id),
-        settlementAPI.getSettlements(id),
-      ]);
-
-      setGroup(groupRes.data);
-      setGroupExpenses(expensesRes.data);
-      setGroupSettlements(settlementsRes.data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load group details",
-        variant: "destructive",
-      });
-      navigate("/groups");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearchUsers = async () => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setSearching(true);
-    try {
-      const response = await userAPI.searchUsers(searchQuery);
-      // Filter out users already in the group
-      const filtered = response.data.filter(
-        (user) => !group.members.some((member) => member.id === user.id),
-      );
-      setSearchResults(filtered);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to search users",
-        variant: "destructive",
-      });
-    } finally {
-      setSearching(false);
-    }
-  };
+  }, [addMemberOpen, group, searchQuery]);
 
   const handleAddMember = async (user) => {
     try {

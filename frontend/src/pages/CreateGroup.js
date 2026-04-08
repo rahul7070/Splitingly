@@ -26,27 +26,6 @@ const CreateGroup = () => {
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setSearching(true);
-    try {
-      const response = await userAPI.searchUsers(searchQuery);
-      setSearchResults(response.data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to search users",
-        variant: "destructive",
-      });
-    } finally {
-      setSearching(false);
-    }
-  };
-
   const handleAddMember = (user) => {
     if (!selectedMembers.find((m) => m.id === user.id)) {
       setSelectedMembers([...selectedMembers, user]);
@@ -101,8 +80,29 @@ const CreateGroup = () => {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
+      const runSearch = async () => {
+        if (!searchQuery.trim()) {
+          setSearchResults([]);
+          return;
+        }
+
+        setSearching(true);
+        try {
+          const response = await userAPI.searchUsers(searchQuery);
+          setSearchResults(response.data);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to search users",
+            variant: "destructive",
+          });
+        } finally {
+          setSearching(false);
+        }
+      };
+
       if (searchQuery) {
-        handleSearch();
+        runSearch();
       }
     }, 500);
 

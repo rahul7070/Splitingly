@@ -22,25 +22,25 @@ const Activity = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchActivities();
-  }, [filter]);
+    const loadActivities = async () => {
+      try {
+        setLoading(true);
+        const response = await balanceAPI.getActivity(filter);
+        setActivities(response.data);
+      } catch (error) {
+        console.error("Error fetching activity:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load activity",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchActivities = async () => {
-    try {
-      setLoading(true);
-      const response = await balanceAPI.getActivity(filter);
-      setActivities(response.data);
-    } catch (error) {
-      console.error("Error fetching activity:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load activity",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadActivities();
+  }, [filter]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
